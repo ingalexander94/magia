@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  mariadb:
+    image: mariadb:11.0.2
+    tty: true
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./mariadb/data:/var/lib/mysql/data/
+    environment:
+      - MYSQL_USER=mysqldb
+      - MYSQL_PASSWORD=XShWJZbkijODfSsJfUHw
+      - MYSQL_ROOT_PASSWORD=IqggGBfYniKzbuqSOdRV
+      - MYSQL_DATABASE=demosgracias
+    ports:
+      - 3307:3306
+    logging:
+      driver: none
+
+  phpmyadmin:
+    image: phpmyadmin:5.2.1
+    restart: always
+    ports:
+      - 80:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mariadb
+      - PMA_PORT=3306
+    depends_on:
+      - mariadb
+
+  node:
+    depends_on:
+      - mariadb
+    links:
+      - mariadb
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    environment:
+      - DB_HOST=mariadb
+      - DB_USER=alexander
+      - DB_PASSWORD=XShWJZbkijODfSsJfUHw
+      - DB_NAME=demosgracias
+      - DB_PORT=3306
+    volumes:
+      - ./src/:/app
